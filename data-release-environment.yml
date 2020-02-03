@@ -11,11 +11,11 @@ dependencies:
   - matplotlib             # base
   - networkx>=2.4          # base We depend on features introduced in v2.2
   - numpy>=1.17.3          # base
-  - pandas>=0.25           # base We use nullable integers!
+  - pandas>=0.25,<1.0      # base We use nullable integers!
   - pip                    # N/A
   - pyarrow>=0.15.1        # base compilation issues below 0.14.0
   - pytest                 # dev Required for data validation.
-  - python>=3.7            # N/A
+  - python>=3.7,<3.8.0a    # N/A
   - python-snappy>=0.5.4   # base
   - pyyaml                 # base
   - scikit-learn>=0.22     # base pandas integration added in v0.20

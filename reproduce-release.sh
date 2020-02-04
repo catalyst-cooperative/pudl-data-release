@@ -1,13 +1,4 @@
 #!/bin/bash
-# A script to generate a reproducible data release locally.
-# Assumes:
-#  - A Unix-like OS
-#  - libsnappy is installed
-#  - miniconda is installed in ~/miniconda3
-#  - Should be run from a fresh directory containing only:
-#    - this script
-#    - the pudl-data-release-environment.yml conda environment file
-#    - the pudl-data-release-settings.yml PUDL settings file
 
 PUDL_VERSION=0.3.0
 START_TIME=$(date --iso-8601="seconds")
@@ -38,18 +29,16 @@ echo "======================================================================"
 echo $START_TIME
 echo "Creating and archiving PUDL conda environment"
 echo "======================================================================"
-~/miniconda3/bin/conda init bash
-export PATH=~/miniconda3/bin:$PATH
-eval "$(~/miniconda3/bin/conda shell.bash hook)"
-source ~/miniconda3/etc/profile.d/conda.sh
-~/miniconda3/bin/conda env remove --name reproduce-pudl-data-release
-~/miniconda3/bin/conda config --set channel_priority strict
-~/miniconda3/bin/conda env create \
+$CONDA_EXE init bash
+eval "$($CONDA_EXE shell.bash hook)"
+$CONDA_EXE env remove --name reproduce-pudl-data-release
+$CONDA_EXE config --set channel_priority strict
+$CONDA_EXE env create \
     --name reproduce-pudl-data-release \
     --file reproduce-environment.yml
 source activate reproduce-pudl-data-release
 
-ACTIVE_CONDA_ENV=$(conda env list | grep '\*' | awk '{print $1}')
+ACTIVE_CONDA_ENV=$($CONDA_EXE env list | grep '\*' | awk '{print $1}')
 echo "Active conda env: $ACTIVE_CONDA_ENV"
 
 echo "======================================================================"
@@ -72,7 +61,7 @@ ferc1_to_sqlite --clobber data-release-settings.yml
 
 echo "======================================================================"
 date --iso-8601="seconds"
-echo "Running PUDL ETL"
+echo "Running PUDL ETL to generate data packages."
 echo "======================================================================"
 pudl_etl --clobber data-release-settings.yml
 

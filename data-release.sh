@@ -3,7 +3,8 @@
 # Assumes:
 #  - A Unix-like OS
 #  - libsnappy is installed
-#  - miniconda is installed in ~/miniconda3
+#  - conda is installed
+#  - Environment variable $CONDA_EXE is path to conda
 #  - Should be run from a fresh directory containing only:
 #    - this script (data-release.sh)
 #    - the pudl-data-release-environment.yml conda environment file
@@ -40,18 +41,16 @@ echo "======================================================================"
 echo $START_TIME
 echo "Creating and archiving PUDL conda environment"
 echo "======================================================================"
-~/miniconda3/bin/conda init bash
-export PATH=~/miniconda3/bin:$PATH
-eval "$(~/miniconda3/bin/conda shell.bash hook)"
-source ~/miniconda3/etc/profile.d/conda.sh
-~/miniconda3/bin/conda env remove --name pudl-data-release
-~/miniconda3/bin/conda config --set channel_priority strict
-~/miniconda3/bin/conda env create \
+$CONDA_EXE init bash
+eval "$($CONDA_EXE shell.bash hook)"
+$CONDA_EXE env remove --name pudl-data-release
+$CONDA_EXE config --set channel_priority strict
+$CONDA_EXE env create \
     --name pudl-data-release \
     --file data-release-environment.yml catalystcoop.pudl=$PUDL_VERSION
 source activate pudl-data-release
 
-ACTIVE_CONDA_ENV=$(conda env list | grep '\*' | awk '{print $1}')
+ACTIVE_CONDA_ENV=$($CONDA_EXE env list | grep '\*' | awk '{print $1}')
 echo "Active conda env: $ACTIVE_CONDA_ENV"
 
 # Obtain and install the most recent PUDL commit (or the tagged release...):
@@ -59,7 +58,7 @@ rm -rf pudl
 git clone --depth 1 https://github.com/catalyst-cooperative/pudl.git --branch v$PUDL_VERSION
 pip install --editable ./pudl
 # Record exactly which software was installed for ETL:
-~/miniconda3/bin/conda env export > reproduce-environment.yml
+$CONDA_EXE env export > reproduce-environment.yml
 
 echo "======================================================================"
 date --iso-8601="seconds"
@@ -109,25 +108,12 @@ epacems_to_parquet --clobber $EPACEMS_YEARS $EPACEMS_STATES -- \
     datapkg/pudl-data-release/pudl-eia860-eia923-epacems/datapackage.json
 
 # Validate the data we've loaded
-# Can't actually do this right now because it requires *all* the data
-#tox -v -c pudl/tox.ini -e validate #> data-validation.log
-# Instead just a a structural test, let's run the Travis tests...
+# Only want to do this when we're processing all the FERC 1 & EIA data...
 echo "======================================================================"
 date --iso-8601="seconds"
 echo "Using Tox to validate PUDL data before release."
 echo "======================================================================"
-# Only want to do this when we're processing all the FERC 1 & EIA data...
 tox -v -c pudl/tox.ini -e validate
-
-# This is just for testing purposes... obviously we need a real README
-echo "======================================================================"
-date --iso-8601="seconds"
-echo "Copying data release README files into each data package."
-echo "======================================================================"
-touch README.md
-cp README.md datapkg/pudl-data-release/pudl-ferc1
-cp README.md datapkg/pudl-data-release/pudl-eia860-eia923/
-cp README.md datapkg/pudl-data-release/pudl-eia860-eia923-epacems/
 
 echo "======================================================================"
 date --iso-8601="seconds"
@@ -140,10 +126,17 @@ echo "======================================================================"
 date --iso-8601="seconds"
 echo "Archiving PUDL datapackages for distribution."
 echo "======================================================================"
-tar -czf zenodo-archive/pudl-ferc1.tgz datapkg/pudl-data-release/pudl-ferc1/
-tar -czf zenodo-archive/pudl-eia860-eia923.tgz datapkg/pudl-data-release/pudl-eia860-eia923/
-tar -czf zenodo-archive/pudl-eia860-eia923-epacems.tgz datapkg/pudl-data-release/pudl-eia860-eia923-epacems/
+tar -czf zenodo-archive/pudl-ferc1.tgz \
+    datapkg/pudl-data-release/pudl-ferc1/
+
+tar -czf zenodo-archive/pudl-eia860-eia923.tgz \
+    datapkg/pudl-data-release/pudl-eia860-eia923/
+
+tar -czf zenodo-archive/pudl-eia860-eia923-epacems.tgz \
+    datapkg/pudl-data-release/pudl-eia860-eia923-epacems/
+
 cp data-release.sh \
+    reproduce-release.sh \
     data-release-settings.yml \
     data-release-environment.yml \
     reproduce-environment.yml \

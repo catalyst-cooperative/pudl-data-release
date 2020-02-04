@@ -165,7 +165,7 @@ via `conda` using the community maintained `conda-forge` channel, and in
 [the PUDL Github repository](https://github.com/catalyst-cooperative/pudl). It
 is also [archived on Zenodo](https://doi.org/10.5281/zenodo.3631868).
 
-The `reproduce-environment.yml` `conda` environment file enumerates the
+The `archived-environment.yml` `conda` environment file enumerates the
 Python packages that were installed in the environment used to generate this
 data package, along with their versions.
 
@@ -187,8 +187,8 @@ file included with the release.
 
 In order to reproduce the outputs archived here using the archived inputs, you
 should be able to simply place all of the files form the Zenodo archive in an
-empty directory, and run the `reproduce-release.sh` script from within that
-directory, subject to the hardware requirements mentioned above.
+empty directory, and run the `reproduce-data-release.sh` script from within
+that directory, subject to the hardware requirements mentioned above.
 
 # Using the Data
 To How to organize the data for use with the PUDL library.
@@ -231,7 +231,6 @@ ferc1_to_sqlite data-release-settings.yml
 * Write up acknowledgements Section.
 * Write up "Contact Us" section
 
-* Check if we can use short path to conda in data-release.sh and reproduce-release.sh?
 * Check in README and scripts.
 * Upload files to Zenodo Sandbox
 * Try downloading files from Zenodo Sandbox and see if anything is wonky.

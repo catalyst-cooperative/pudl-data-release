@@ -7,10 +7,9 @@
 #  - Environment variable $CONDA_EXE is path to conda
 #  - Should be run from a fresh directory containing only:
 #    - this script (data-release.sh)
-#    - the pudl-data-release-environment.yml conda environment file
 #    - the pudl-data-release-settings.yml PUDL settings file
 #    - README.md
-#    - reproduce-release.sh
+#    - reproduce-data-release.sh
 
 PUDL_VERSION=0.3.0
 START_TIME=$(date --iso-8601="seconds")
@@ -53,7 +52,7 @@ ACTIVE_CONDA_ENV=$($CONDA_EXE env list | grep '\*' | awk '{print $1}')
 echo "Active conda env: $ACTIVE_CONDA_ENV"
 
 # Record exactly which software was installed for ETL:
-$CONDA_EXE env export > reproduce-environment.yml
+$CONDA_EXE env export --no-build | grep -v "^prefix" > archived-environment.yml
 
 echo "======================================================================"
 date --iso-8601="seconds"
@@ -141,10 +140,9 @@ tar -czf zenodo-archive/pudl-eia860-eia923-epacems.tgz \
     datapkg/pudl-data-release/pudl-eia860-eia923-epacems/
 
 cp data-release.sh \
-    reproduce-release.sh \
+    reproduce-data-release.sh \
     data-release-settings.yml \
-    data-release-environment.yml \
-    reproduce-environment.yml \
+    archived-environment.yml \
     README.md \
     zenodo-archive
 

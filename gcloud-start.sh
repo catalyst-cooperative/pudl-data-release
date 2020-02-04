@@ -20,8 +20,7 @@ gcloud compute instances create pudl-data-release \
 #  --metadata-from-file startup-script=data_release.sh
 
 gcloud compute scp \
-    data-release-environment.yml \
     data-release-settings.yml \
     data-release.sh \
-    reproduce-release.sh \
+    reproduce-data-release.sh \
     zane@pudl-data-release: --zone=$GCP_ZONE

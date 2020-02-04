@@ -44,19 +44,14 @@ echo "======================================================================"
 $CONDA_EXE init bash
 eval "$($CONDA_EXE shell.bash hook)"
 $CONDA_EXE env remove --name pudl-data-release
-$CONDA_EXE config --set channel_priority strict
-$CONDA_EXE env create \
-    --name pudl-data-release \
-    --file data-release-environment.yml catalystcoop.pudl=$PUDL_VERSION
+$CONDA_EXE create --yes --name pudl-data-release \
+    --strict-channel-priority --channel conda-forge \
+    python=3.7 pip git catalystcoop.pudl=$PUDL_VERSION
 source activate pudl-data-release
 
 ACTIVE_CONDA_ENV=$($CONDA_EXE env list | grep '\*' | awk '{print $1}')
 echo "Active conda env: $ACTIVE_CONDA_ENV"
 
-# Obtain and install the most recent PUDL commit (or the tagged release...):
-rm -rf pudl
-git clone --depth 1 https://github.com/catalyst-cooperative/pudl.git --branch v$PUDL_VERSION
-pip install --editable ./pudl
 # Record exactly which software was installed for ETL:
 $CONDA_EXE env export > reproduce-environment.yml
 
@@ -106,6 +101,16 @@ echo "Converting EPA CEMS data to Apache Parquet for validation."
 echo "======================================================================"
 epacems_to_parquet --clobber $EPACEMS_YEARS $EPACEMS_STATES -- \
     datapkg/pudl-data-release/pudl-eia860-eia923-epacems/datapackage.json
+
+echo "======================================================================"
+date --iso-8601="seconds"
+echo "Install packages required for data validation but not ETL."
+echo "======================================================================"
+# Obtain and install the most recent PUDL commit (or the tagged release...):
+$CONDA_EXE install --yes pytest tox
+rm -rf pudl
+git clone --depth 1 https://github.com/catalyst-cooperative/pudl.git --branch v$PUDL_VERSION
+pip install --editable ./pudl
 
 # Validate the data we've loaded
 # Only want to do this when we're processing all the FERC 1 & EIA data...

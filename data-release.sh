@@ -5,11 +5,8 @@
 #  - libsnappy is installed
 #  - conda is installed
 #  - Environment variable $CONDA_EXE is path to conda
-#  - Should be run from a fresh directory containing only:
-#    - this script (data-release.sh)
-#    - the pudl-data-release-settings.yml PUDL settings file
-#    - README.md
-#    - reproduce-data-release.sh
+#  - Should be run from within a fresh git clone:
+#    https://github.com/catalyst-cooperative/pudl-data-release.git
 
 PUDL_VERSION=0.3.0
 START_TIME=$(date --iso-8601="seconds")
@@ -83,6 +80,33 @@ pudl_etl --clobber data-release-settings.yml
 
 echo "======================================================================"
 date --iso-8601="seconds"
+echo "Archiving raw input data for distribution."
+echo "======================================================================"
+mkdir zenodo-archive
+tar -czf zenodo-archive/pudl-input-data.tgz data/
+
+echo "======================================================================"
+date --iso-8601="seconds"
+echo "Archiving PUDL datapackages for distribution."
+echo "======================================================================"
+tar -czf zenodo-archive/pudl-ferc1.tgz \
+    datapkg/pudl-data-release/pudl-ferc1/
+
+tar -czf zenodo-archive/pudl-eia860-eia923.tgz \
+    datapkg/pudl-data-release/pudl-eia860-eia923/
+
+tar -czf zenodo-archive/pudl-eia860-eia923-epacems.tgz \
+    datapkg/pudl-data-release/pudl-eia860-eia923-epacems/
+
+cp data-release.sh \
+    reproduce-data-release.sh \
+    data-release-settings.yml \
+    archived-environment.yml \
+    README.md \
+    zenodo-archive
+
+echo "======================================================================"
+date --iso-8601="seconds"
 echo "Loading FERC 1 & EIA 860/923 data into SQLite for validation."
 echo "======================================================================"
 # Load the FERC 1 and EIA datapackages into an SQLite DB:
@@ -108,7 +132,8 @@ echo "======================================================================"
 # Obtain and install the most recent PUDL commit (or the tagged release...):
 $CONDA_EXE install --yes pytest tox
 rm -rf pudl
-git clone --depth 1 https://github.com/catalyst-cooperative/pudl.git --branch v$PUDL_VERSION
+git clone --depth 1 --branch v$PUDL_VERSION \
+    https://github.com/catalyst-cooperative/pudl.git
 pip install --editable ./pudl
 
 # Validate the data we've loaded
@@ -118,33 +143,6 @@ date --iso-8601="seconds"
 echo "Using Tox to validate PUDL data before release."
 echo "======================================================================"
 tox -v -c pudl/tox.ini -e validate
-
-echo "======================================================================"
-date --iso-8601="seconds"
-echo "Archiving raw input data for distribution."
-echo "======================================================================"
-mkdir zenodo-archive
-tar -czf zenodo-archive/pudl-input-data.tgz data/
-
-echo "======================================================================"
-date --iso-8601="seconds"
-echo "Archiving PUDL datapackages for distribution."
-echo "======================================================================"
-tar -czf zenodo-archive/pudl-ferc1.tgz \
-    datapkg/pudl-data-release/pudl-ferc1/
-
-tar -czf zenodo-archive/pudl-eia860-eia923.tgz \
-    datapkg/pudl-data-release/pudl-eia860-eia923/
-
-tar -czf zenodo-archive/pudl-eia860-eia923-epacems.tgz \
-    datapkg/pudl-data-release/pudl-eia860-eia923-epacems/
-
-cp data-release.sh \
-    reproduce-data-release.sh \
-    data-release-settings.yml \
-    archived-environment.yml \
-    README.md \
-    zenodo-archive
 
 echo "======================================================================"
 END_TIME=$(date --iso-8601="seconds")

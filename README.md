@@ -53,24 +53,99 @@ release. It can also be re-generated using the `catalystcoop.pudl` Python
 package and the original source data files archived as part of this data
 release.
 
-# Data Validation and Quality
+# Using the Data
+The data packages are just CSVs (data) and JSON (metadata) files. They can be
+used with a variety of tools on many platforms. However, the data is organized
+primarily with the idea that it will be loaded into a relational database, and
+the PUDL Python package that was used to generate this data release can
+facilitate that process. And of course once the data is loaded into a database,
+you can access however you like.
+
+First put all the files you've downloaded from the Zenodo archive in a new
+empty directory. Here we call it `pudl-work`. Then `cd` into that directory at
+the terminal and extract the downloaded data packages. This will create a
+directory called `datapkg/pudl-data-release` containing three data packages:
+```
+cd pudl-work
+tar -xzf pudl-ferc1.tgz
+tar -xzf pudl-eia860-eia923.tgz
+tar -xzf pudl-eia860-eia923-epacems.tgz
+```
+We are assuming you already have `conda` installed, either via Anaconda or
+`miniconda`. Use `conda` to install the PUDL software in its own environment,
+and activate that environment:
+```
+conda create --yes --name pudl --channel conda-forge \
+    --strict-channel-priority python=3.7 catalystcoop.pudl=0.3.0
+conda activate pudl
+```
+Use the PUDL setup script to create a new data management environment inside
+the `pudl-work` directory, where all the data is sitting. After you run this
+command you'll see some other directories show up, like `parquet`, `sqlite`,
+`data` etc.
+```
+pudl_setup ./
+```
+To make use of the FERC Form 1 and EIA 860/923 data, you'll probably want to
+load them into a local database. The `datapkg_to_sqlite` script that comes with
+PUDL will do that for you:
+```
+datapkg_to_sqlite \
+    datapkg/pudl-data-release/pudl-ferc1/datapackage.json \
+    datapkg/pudl-data-release/pudl-eia860-eia923/datapackage.json \
+    -o datapkg/pudl-data-release/pudl-merged/
+```
+If you want to work with the EPA CEMS data, which is much larger, we recommend
+converting it to an Apache Parquet dataset with the included
+`epacems_to_parquet` script. Then you can read those files into dataframes
+directly. In Python you can use the `pandas.DataFrame.read_parquet()` method.
+If you need to work with more data than can fit in memory at one time, we
+recommend using Dask dataframes. Converting the entire dataset from
+datapackages into Apache Parquet may take an hour or more:
+```
+epacems_to_parquet datapkg/pudl-data-release/pudl-eia860-eia923-epacems/datapackage.json
+```
+If you want to access the entire set of original, raw FERC Form 1 data (of
+which only a small subset has been cleaned and integrated into PUDL) you can
+extract the original input data that's part of the Zenodo archive and run the
+`ferc1_to_sqlite` script using the same settings file that was used to generate
+the data release:
+```
+tar -xzf pudl-input-data.tgz
+ferc1_to_sqlite data-release-settings.yml
+```
+
+# Data Quality Control
 We have performed basic sanity checks on much but not all of the data compiled
 in PUDL to ensure that we identify any major issues we might have introduced
 through our processing prior to release. These checks have also identified some
 issues in the originally reported data.
 
-## Quality Control
-* Reported ownership shares of plants add up to ~100%
-* Fuel heat content per unit and prices are within reasonable bounds.
-* Fuel sulfur, ash, moisture, chlorine, and mercury content are within
-  reasonable bounds.
-* EIA reported generation units are not split across more than one PUDL
-  identified unit.
+## Data Validation Test Cases
+We've compiled a collection of data validation test cases which were run
+against the data in this release prior to publication. These include:
+* For reported values that have a physically constrained valid range of values
+  do the vast majority of reported records fall within that valid range? This
+  includes quantities like heat content per unit of fuel delivered/consumed,
+  the sulfur, ash, moisture, chlorine, and mercury content of coal.
+* Do ownership shares of individual generators reported in EIA 860 sum to 100%?
+* Are derived IDs that are used to group units of infrastructure together
+  internally self consistent? For example, are there ever cases where a
+  reported EIA generation unit appears in more than one inferred PUDL
+  generation unit?
+* For quantities that may not have a physically constrained range of valid
+  values, do annual slices of the data at least statistically consistent with
+  the historical values reported for that quantity? For example, fuel prices
+  per unit delivered and per unit heat content.
 * ......
 * ......
 * ......
 * ......
 * ......
+
+For the complete details see the `pudl.validate` module and the PyTest routines
+organized under `test/validate` in [the PUDL repository on
+Github](https://github.com/catalyst-cooperative/pudl). A summary
 
 ## Known Issues
 
@@ -142,12 +217,14 @@ but this process is imperfect.
 Many other tables still have not been similarly coded, the `plants_small_ferc1`
 and `purchased_power_ferc1` tables remain especially messy.
 
-# Reproducing This Data Release
+# Reproducibility
 It's our intention that a user should be able to completely reproduce the data
 processing pipeline that we've used to generate this data release, and get the
 same outputs byte-for-byte, using only resources that are available in curated,
 long-term archives. The main requirements are a copy of the same original
-source data (archived here), and a specification of the software environment.
+source data (archived as part of this data release), and a specification of the
+software environment (which can be reconstructed with packages from
+`conda-forge` or the Python Package Index).
 
 ## Original Source Data
 The original source data as downloaded from the public sources and used by the
@@ -156,23 +233,25 @@ outputs in the interest of reproducibility. The publishing agencies do not use
 version control or provide access to historically published versions, meaning
 that the same data may not remain available from them going forward. All of the
 original input data can be found in the `pudl-input-data.tgz` compressed
-archive distributed with this data release.
+archive distributed with this data release. The data it contains were
+downloaded from FERC, EIA, and EPA between January 31st and February 3rd, 2020.
 
 ## Software Environment
 This data release was generated using v0.3.0 of the `catalystcoop.pudl` Python
-package, which is available on the official Python Package Index as well as
-via `conda` using the community maintained `conda-forge` channel, and in
-[the PUDL Github repository](https://github.com/catalyst-cooperative/pudl). It
-is also [archived on Zenodo](https://doi.org/10.5281/zenodo.3631868).
+package, which is available on the official Python Package Index as well as via
+`conda` using the community maintained `conda-forge` channel. It's also
+archived in [the PUDL Github
+repository](https://github.com/catalyst-cooperative/pudl/releases/tag/v0.3.0).
+and [on Zenodo](https://doi.org/10.5281/zenodo.3631868).
 
-The `archived-environment.yml` `conda` environment file enumerates the
-Python packages that were installed in the environment used to generate this
-data package, along with their versions.
+The `archived-environment.yml` file distributed in this archive describes the
+`conda` software environment in which this data release was generated.
 
 ## OS / Hardware
 The data package was generated on an Ubuntu Linux 19.10 system. The only
 specialized external library that was required outside of the `conda` framework
-was `libsnappy-dev` version `1.1.7-1`.
+was `libsnappy-dev` version `1.1.7-1`. This library should not be required if
+you use `conda`.
 
 The data processing pipeline used to generate this data release required ~24 GB
 of memory, mostly due to record linkage between years of the large steam plants
@@ -190,55 +269,26 @@ should be able to simply place all of the files form the Zenodo archive in an
 empty directory, and run the `reproduce-data-release.sh` script from within
 that directory, subject to the hardware requirements mentioned above.
 
-# Using the Data
-To How to organize the data for use with the PUDL library.
-
-
-```
-mkdir pudl-work
-cd pudl-work
-tar -xzf pudl-ferc1.tgz
-tar -xzf pudl-eia860-eia923.tgz
-tar -xzf pudl-eia860-eia923-epacems.tgz
-
-conda create --yes --name pudl --channel conda-forge \
-    --strict-channel-priority python=3.7 \
-    catalystcoop.pudl=0.3.0 jupyter jupyterlab pip
-conda activate pudl
-
-pudl_setup ./
-
-datapkg_to_sqlite
-    datapkg/pudl-data-release/pudl-ferc1/datapackage.json \
-    datapkg/pudl-data-release/pudl-eia860-eia923/datapackage.json \
-    -o datapkg/pudl-data-release/pudl-merged/
-
-epacems_to_parquet datapkg/pudl-data-release/pudl-eia860-eia923-epacems/datapackage.json
-
-ferc1_to_sqlite data-release-settings.yml
-
-```
-* Exhortation for users to get in touch with us and let us know what they're
-  using PUDL for.
-* Instructions on how to report any data issues which were not listed in the
-  README.
-
 # Acknowledgments
 * Sloan and Flora foundation
 
-# DATA RELEASE REMAINING TODO:
-* Write up data errata.
-* Write up acknowledgements Section.
-* Write up "Contact Us" section
+# TODO:
 
-* Check in README and scripts.
-* Upload files to Zenodo Sandbox
+## Up/Down
+* Upload files to Zenodo Sandbox (again)
 * Try downloading files from Zenodo Sandbox and see if anything is wonky.
 
+## Writing:
+* Finish data errata / validation.
+* Acknowledgments
+* Contact Us / Bug Reports
+
+## Deployment / Publication
 * Get a real DOI for the data release from Zenodo
-* Insert real DOI into the README.
-* Commit final README with real DOI.
+* Insert real DOI into the README & ETL settings file.
+* Commit final README & ETL settings file with real DOI (ALL CEMS STATES).
 * Tag v1.0.0 in the pudl-data-release repository
-* Re-generate final v1.0.0 release using v1.0.0 tagged commit.
+* Re-generate final v1.0.0 release using tagged commit.
 * Upload files to Zenodo for real
-* Fill in archive metadata on Zenodo
+* Fill in additional archive metadata on Zenodo
+* Save and Publish the Release!

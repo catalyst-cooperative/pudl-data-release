@@ -9,8 +9,8 @@ open source software used to generate this data release, see [Catalyst
 Cooperative's PUDL repository on
 Github](https://github.com/catalyst-cooperative/pudl), and the associated
 [documentation on Read The
-Docs](https://catalystcoop-pudl.readthedocs.io/en/v0.3.0/). This data release
-was generated using v0.3.0 of the `catalystcoop.pudl` python package.
+Docs](https://catalystcoop-pudl.readthedocs.io/en/v0.3.1/). This data release
+was generated using v0.3.1 of the `catalystcoop.pudl` python package.
 
 # Included Data Packages
 This release consists of three tabular data packages, conforming to the
@@ -58,33 +58,72 @@ The data packages are just CSVs (data) and JSON (metadata) files. They can be
 used with a variety of tools on many platforms. However, the data is organized
 primarily with the idea that it will be loaded into a relational database, and
 the PUDL Python package that was used to generate this data release can
-facilitate that process. And of course once the data is loaded into a database,
-you can access however you like.
+facilitate that process. Once the data is loaded into a database, you can
+access that DB however you like.
 
-First put all the files you've downloaded from the Zenodo archive in a new
-empty directory. Here we call it `pudl-work`. Then `cd` into that directory at
-the terminal and extract the downloaded data packages. This will create a
-directory called `datapkg/pudl-data-release` containing three data packages:
+## Make sure conda is installed
+None of these commands will work without the `conda` Python package manager
+installed, either via Anaconda or `miniconda`:
+* [Install Anaconda](https://www.anaconda.com/distribution/)
+* [Install miniconda](https://docs.conda.io/en/latest/miniconda.html)
+
+## Download the data
+First download the files from the Zenodo archive into a new empty
+directory. **A couple of them are very large (5-10 GB)**, and depending on what
+you're trying to do you may not need them.
+* If you don't want to recreate the data release from scratch by re-running the
+  entire ETL process yourself, and you don't want to create full clone of the
+  original FERC Form 1 database, including all of the data that has not yet
+  been integrated into PUDL, then you don't need to download
+  `pudl-input-data.tgz`.
+* If you don't need the EPA CEMS Hourly Emissions data, you do not need to
+  download `pudl-eia860-eia923-epacems.tgz`.
+
+## Load All of PUDL in a Single Line
+Use `cd` to get into your new directory at the terminal (in Linux or Mac OS),
+or open up an Anaconda terminal in that directory if you're on Windows.
+
+**If you have downloaded all of the files from the archive**, and you want it
+all to be accessible locally, you can run a single shell script, called
+`load-pudl.sh`:
+
 ```
-cd pudl-work
-tar -xzf pudl-ferc1.tgz
-tar -xzf pudl-eia860-eia923.tgz
-tar -xzf pudl-eia860-eia923-epacems.tgz
+bash pudl-load.sh
 ```
-We are assuming you already have `conda` installed, either via Anaconda or
-`miniconda`. Use `conda` to install the PUDL software in its own environment,
-and activate that environment:
+This will do the following:
+* Load the FERC Form 1, EIA Form 860, and EIA Form 923 data packages into a
+SQLite database which can be found at `sqlite/pudl.sqlite`.
+* Convert the EPA CEMS data package into an Apache Parquet dataset which can be
+  found at `parquet/epacems`.
+* Clone all of the FERC Form 1 annual databases into a single SQLite database
+  which can be found at `sqlite/ferc1.sqlite`.
+
+## Selectively Load PUDL Data
+If you don't want to download and load all of the PUDL data, you can load each
+of the above datasets separately.
+
+### Create the PUDL `conda` Environment
+This installs the PUDL software locally, and a couple of other useful packages:
 ```
 conda create --yes --name pudl --channel conda-forge \
-    --strict-channel-priority python=3.7 catalystcoop.pudl=0.3.0
+    --strict-channel-priority \
+    python=3.7 catalystcoop.pudl=0.3.1 dask jupyter jupyterlab seaborn pip
 conda activate pudl
 ```
+### Create a PUDL data management workspace
 Use the PUDL setup script to create a new data management environment inside
-the `pudl-work` directory, where all the data is sitting. After you run this
-command you'll see some other directories show up, like `parquet`, `sqlite`,
-`data` etc.
+this directory. After you run this command you'll see some other directories
+show up, like `parquet`, `sqlite`, `data` etc.
 ```
 pudl_setup ./
+```
+### Extract and load the FERC Form 1 and EIA 860/923 data
+If you just want the FERC Form 1 and EIA 860/923 data that has been integrated
+into PUDL, you downloaded just `pudl-ferc1.tgz` and `pudl-eia860-eia923.tgz`
+and extract them in the same directory where you ran `pudl_setup`:
+```
+tar -xzf pudl-ferc1.tgz
+tar -xzf pudl-eia860-eia923.tgz
 ```
 To make use of the FERC Form 1 and EIA 860/923 data, you'll probably want to
 load them into a local database. The `datapkg_to_sqlite` script that comes with
@@ -95,6 +134,8 @@ datapkg_to_sqlite \
     datapkg/pudl-data-release/pudl-eia860-eia923/datapackage.json \
     -o datapkg/pudl-data-release/pudl-merged/
 ```
+
+### Extract EPA CEMS and convert to Apache Parquet
 If you want to work with the EPA CEMS data, which is much larger, we recommend
 converting it to an Apache Parquet dataset with the included
 `epacems_to_parquet` script. Then you can read those files into dataframes
@@ -103,8 +144,11 @@ If you need to work with more data than can fit in memory at one time, we
 recommend using Dask dataframes. Converting the entire dataset from
 datapackages into Apache Parquet may take an hour or more:
 ```
+tar -xzf pudl-eia860-eia923-epacems.tgz
 epacems_to_parquet datapkg/pudl-data-release/pudl-eia860-eia923-epacems/datapackage.json
 ```
+
+### Clone the raw FERC Form 1 Databases
 If you want to access the entire set of original, raw FERC Form 1 data (of
 which only a small subset has been cleaned and integrated into PUDL) you can
 extract the original input data that's part of the Zenodo archive and run the
@@ -237,12 +281,12 @@ archive distributed with this data release. The data it contains were
 downloaded from FERC, EIA, and EPA between January 31st and February 3rd, 2020.
 
 ## Software Environment
-This data release was generated using v0.3.0 of the `catalystcoop.pudl` Python
+This data release was generated using v0.3.1 of the `catalystcoop.pudl` Python
 package, which is available on the official Python Package Index as well as via
 `conda` using the community maintained `conda-forge` channel. It's also
 archived in [the PUDL Github
-repository](https://github.com/catalyst-cooperative/pudl/releases/tag/v0.3.0).
-and [on Zenodo](https://doi.org/10.5281/zenodo.3631868).
+repository](https://github.com/catalyst-cooperative/pudl/releases/tag/v0.3.1).
+and [on Zenodo](https://doi.org/10.5281/zenodo.3647661)
 
 The `archived-environment.yml` file distributed in this archive describes the
 `conda` software environment in which this data release was generated.
@@ -270,13 +314,11 @@ empty directory, and run the `reproduce-data-release.sh` script from within
 that directory, subject to the hardware requirements mentioned above.
 
 # Acknowledgments
-* Sloan and Flora foundation
+* Alfred P. Sloan
+* Flora Family Fund
+* Frictionless Data / Open Knowledge Foundation
 
 # TODO:
-
-## Up/Down
-* Upload files to Zenodo Sandbox (again)
-* Try downloading files from Zenodo Sandbox and see if anything is wonky.
 
 ## Writing:
 * Finish data errata / validation.
@@ -284,7 +326,8 @@ that directory, subject to the hardware requirements mentioned above.
 * Contact Us / Bug Reports
 
 ## Deployment / Publication
-* Get a real DOI for the data release from Zenodo
+* Create a pudl@catalyst.coop Zenodo organizational account
+* Get a real DOI for the data release from Zenodo using PUDL account
 * Insert real DOI into the README & ETL settings file.
 * Commit final README & ETL settings file with real DOI (ALL CEMS STATES).
 * Tag v1.0.0 in the pudl-data-release repository

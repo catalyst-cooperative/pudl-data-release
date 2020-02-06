@@ -13,7 +13,7 @@ $CONDA_EXE env remove --name pudl
 # data release... otherwise it probably won't work:
 $CONDA_EXE create --yes --name pudl --channel conda-forge \
     --strict-channel-priority python=3.7 \
-    catalystcoop.pudl=0.3.0 dask jupyter jupyterlab seaborn pip git
+    catalystcoop.pudl=0.3.1 dask jupyter jupyterlab seaborn pip git
 source activate pudl
 
 # Create a new PUDL data management environment here, clobbering your existing
@@ -32,14 +32,14 @@ datapkg_to_sqlite \
     datapkg/pudl-data-release/pudl-eia860-eia923/datapackage.json \
     -o datapkg/pudl-data-release/pudl-merged/
 
+# Convert the EPA CEMS Hourly Emissions tables into an Apache Parquet dataset
+# that is partitioned by year and state.
+EPACEMS_STATES=""
+#EPACEMS_STATES="--states ID"
+epacems_to_parquet $EPACEMS_STATES -- \
+    datapkg/pudl-data-release/pudl-eia860-eia923-epacems/datapackage.json
+
 # Generate the entire raw FERC Form 1 database, which contains far more FERC
 # data than what has been integrated into PUDL:
 tar -xzf pudl-input-data.tgz
 ferc1_to_sqlite data-release-settings.yml
-
-# Convert the EPA CEMS Hourly Emissions tables into an Apache Parquet dataset
-# that is partitioned by year and state. NOTE THAT THIS NEEDS TO GO BEFORE THE
-# FERC1 EXTRACTION ABOVE AND ALSO NEEDS TO BE FOR ALL STATES IN THE FINAL
-# VERSION!!!!!
-epacems_to_parquet --states ID -- \
-    datapkg/pudl-data-release/pudl-eia860-eia923-epacems/datapackage.json

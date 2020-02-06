@@ -8,7 +8,7 @@
 #  - Should be run from within a fresh git clone:
 #    https://github.com/catalyst-cooperative/pudl-data-release.git
 
-PUDL_VERSION=0.3.0
+PUDL_VERSION=0.3.1
 START_TIME=$(date --iso-8601="seconds")
 EIA860_YEARS="--years 2011 2012 2013 2014 2015 2016 2017 2018"
 EIA923_YEARS="--years 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018"

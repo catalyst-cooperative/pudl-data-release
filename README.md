@@ -24,10 +24,10 @@ Data originally collected and published by the [US Energy Information
 Administration](https://www.eia.gov/) (US EIA). The data from [EIA Form
 860](https://www.eia.gov/electricity/data/eia860/)
 covers the years 2011-2018. The [Form 923
-data](https://www.eia.gov/electricity/data/eia923/) covers 2009-2018. The
-overwhelming majority of the data published in the original data sources has
-been included, but some parts, like fuel stocks on hand, have not yet been
-integrated.
+data](https://www.eia.gov/electricity/data/eia923/) covers 2009-2018. A large
+majority of the data published in the original data sources has been included,
+but some parts, like fuel stocks on hand, and EIA 923 schedules 6, 7, & 8 have
+not yet been integrated.
 
 ## `pudl-eia860-eia923-epacems`
 This data package contains all of the same data as the `pudl-eia860-eia923`
@@ -54,12 +54,13 @@ release.
 
 # Contact Us
 If you're using PUDL, we would love to hear from you! Even if it's just a note
-to let us know that you exist, and how you're using the software or data.
-* Subscribe to our Mailchimp for [email
+to let us know that you exist, and how you're using the software or data. You
+can also:
+* Subscribe to our announcements list for [email
   updates](https://catalyst.coop/updates).
 * Use the [Github issue
   tracker](https://github.com/catalyst-cooperative/pudl/issues) to file bugs,
-  suggest improvements, or ask us for support.
+  suggest improvements, or ask for help.
 * Email the project team at [pudl@catalyst.coop](mailto:pudl@catalyst.coop) for
   private communications.
 * Follow [\@CatalystCoop](https://twitter.com/CatalystCoop) on Twitter.
@@ -72,7 +73,7 @@ the PUDL Python package that was used to generate this data release can
 facilitate that process. Once the data is loaded into a database, you can
 access that DB however you like.
 
-## Make sure conda is installed
+## Make sure `conda` is installed
 None of these commands will work without the `conda` Python package manager
 installed, either via Anaconda or `miniconda`:
 * [Install Anaconda](https://www.anaconda.com/distribution/)
@@ -83,7 +84,7 @@ First download the files from the Zenodo archive into a new empty
 directory. **A couple of them are very large (5-10 GB)**, and depending on what
 you're trying to do you may not need them.
 * If you don't want to recreate the data release from scratch by re-running the
-  entire ETL process yourself, and you don't want to create full clone of the
+  entire ETL process yourself, and you don't want to create a full clone of the
   original FERC Form 1 database, including all of the data that has not yet
   been integrated into PUDL, then you don't need to download
   `pudl-input-data.tgz`.
@@ -102,7 +103,7 @@ all to be accessible locally, you can run a single shell script, called
 bash pudl-load.sh
 ```
 This will do the following:
-* Load the FERC Form 1, EIA Form 860, and EIA Form 923 data packages into a
+* Load the FERC Form 1, EIA Form 860, and EIA Form 923 data packages into an
 SQLite database which can be found at `sqlite/pudl.sqlite`.
 * Convert the EPA CEMS data package into an Apache Parquet dataset which can be
   found at `parquet/epacems`.
@@ -130,8 +131,10 @@ pudl_setup ./
 ```
 ### Extract and load the FERC Form 1 and EIA 860/923 data
 If you just want the FERC Form 1 and EIA 860/923 data that has been integrated
-into PUDL, you downloaded just `pudl-ferc1.tgz` and `pudl-eia860-eia923.tgz`
-and extract them in the same directory where you ran `pudl_setup`:
+into PUDL, you only need to download `pudl-ferc1.tgz` and
+`pudl-eia860-eia923.tgz`. Then extract them in the same directory where you ran
+`pudl_setup`:
+
 ```
 tar -xzf pudl-ferc1.tgz
 tar -xzf pudl-eia860-eia923.tgz
@@ -145,6 +148,8 @@ datapkg_to_sqlite \
     datapkg/pudl-data-release/pudl-eia860-eia923/datapackage.json \
     -o datapkg/pudl-data-release/pudl-merged/
 ```
+Now you should be able to connect to the database (~300 MB) which is stored in
+`sqlite/pudl.sqlite`.
 
 ### Extract EPA CEMS and convert to Apache Parquet
 If you want to work with the EPA CEMS data, which is much larger, we recommend
@@ -158,6 +163,8 @@ datapackages into Apache Parquet may take an hour or more:
 tar -xzf pudl-eia860-eia923-epacems.tgz
 epacems_to_parquet datapkg/pudl-data-release/pudl-eia860-eia923-epacems/datapackage.json
 ```
+You should find the Parquet dataset (~5 GB) under `parquet/epacems`,
+partitioned by year and state for easier querying.
 
 ### Clone the raw FERC Form 1 Databases
 If you want to access the entire set of original, raw FERC Form 1 data (of
@@ -169,6 +176,7 @@ the data release:
 tar -xzf pudl-input-data.tgz
 ferc1_to_sqlite data-release-settings.yml
 ```
+You'll find the FERC Form 1 database (~820 MB) in `sqlite/ferc1.sqlite`.
 
 # Data Quality Control
 We have performed basic sanity checks on much but not all of the data compiled
@@ -279,14 +287,16 @@ While the plant names and utility IDs found in the `plants_steam_ferc1` and
 `fuel_ferc1` in any given year for a particular plant are guaranteed to be the
 same, they are not guaranteed to be **unique** which means that in a few cases
 it is not possible to identify exactly how much or what kind of fuel is
-associated with a particular plant record.
+associated with a particular plant record. This is an issue with the original
+FERC Form 1 database design which we can't fix.
 
 ### Imperfect Data Entry Error Correction
 In some cases obvious errors have been made in data entry or units of measure.
 We have attempted to fix some of them (e.g. converting heat content reported in
 BTU per lb of coal into mmbtu per ton) and we are confident that overall these
 corrections have improved the quality of the dataset, but there are likely a
-few cases in which they have been applied incorrectly.
+few cases in which they have been applied incorrectly. If you find something
+off by a factor of 1000, please let us know!
 
 ### Imperfect Coding
 FERC does not restrict the vocabulary respondents may use to describe plant and
@@ -377,7 +387,7 @@ format.
 
 The European [Open Energy Modeling Initiative](https://openmod-initiative.org/)
 and [Open Power System Data](https://open-power-system-data.org/) project
-offered us valuable advise on best practices and served as models for PUDL.
+offered us valuable advice on best practices and served as models for PUDL.
 Thanks especially to Stefan Pfenninger at ETH Zürich and Ingmar Schlect at
 NEON Energie for welcoming us into that community of researchers.
 
@@ -388,10 +398,3 @@ the [Rocky Mountain Institute](https://rmi.org),
 [Vibrant Clean Energy](https://www.vibrantcleanenergy.com/),
 and [Energy Innovation](https://energyinnovation.org/)
 for their early and ongoing support and feedback.
-
-# TODO:
-* Tag v1.0.0 in the pudl-data-release repository
-* Re-generate final v1.0.0 release using tagged commit.
-* Upload files to Zenodo for real
-* Fill in additional archive metadata on Zenodo
-* Save and Publish the Release!

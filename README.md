@@ -2,11 +2,10 @@
 
 This is the first data release from the [Public Utility Data Liberation (PUDL)
 project](https://catalyst.coop/pudl). It can be referenced & cited using
-https://doi.org/10.5281/zenodo.XXXXXXX.
-The most recent release of these data can be found using this concept DOI:
-https://doi.org/10.5281/zenodo.XXXXXXX. For more information about the free and
-open source software used to generate this data release, see [Catalyst
-Cooperative's PUDL repository on
+https://doi.org/10.5281/zenodo.3653159
+
+For more information about the free and open source software used to generate
+this data release, see [Catalyst Cooperative's PUDL repository on
 Github](https://github.com/catalyst-cooperative/pudl), and the associated
 [documentation on Read The
 Docs](https://catalystcoop-pudl.readthedocs.io/en/v0.3.1/). This data release
@@ -52,6 +51,18 @@ Database as a file-based SQLite database at Zenodo, independent of this data
 release. It can also be re-generated using the `catalystcoop.pudl` Python
 package and the original source data files archived as part of this data
 release.
+
+# Contact Us
+If you're using PUDL, we would love to hear from you! Even if it's just a note
+to let us know that you exist, and how you're using the software or data.
+* Subscribe to our Mailchimp for [email
+  updates](https://catalyst.coop/updates).
+* Use the [Github issue
+  tracker](https://github.com/catalyst-cooperative/pudl/issues) to file bugs,
+  suggest improvements, or ask us for support.
+* Email the project team at [pudl@catalyst.coop](mailto:pudl@catalyst.coop) for
+  private communications.
+* Follow [\@CatalystCoop](https://twitter.com/CatalystCoop) on Twitter.
 
 # Using the Data
 The data packages are just CSVs (data) and JSON (metadata) files. They can be
@@ -165,13 +176,25 @@ in PUDL to ensure that we identify any major issues we might have introduced
 through our processing prior to release. These checks have also identified some
 issues in the originally reported data.
 
+If you have suggestions for additional types of data quality control and
+validation tests we would love to hear them, or see them in a pull request!
+
 ## Data Validation Test Cases
 We've compiled a collection of data validation test cases which were run
-against the data in this release prior to publication. These include:
+against the data in this release prior to publication. For the complete details
+see the `pudl.validate` module and the PyTest routines organized under
+`test/validate` in
+[the PUDL repository on Github](https://github.com/catalyst-cooperative/pudl).
+Generally these tests include:
+* Ensuring that there are no entirely NULL columns. This often happens due to
+  a bad merge between dataframes when there's a misnamed column.
+* Make sure that tables have the expected number of records, to +/- 10%.
+* Ensure that tables do not contain duplicate records within specified subsets
+  of columns that should serve as unique keys.
 * For reported values that have a physically constrained valid range of values
   do the vast majority of reported records fall within that valid range? This
   includes quantities like heat content per unit of fuel delivered/consumed,
-  the sulfur, ash, moisture, chlorine, and mercury content of coal.
+  the sulfur, ash, moisture, chlorine, mercury content of coal, plant capacity.
 * Do ownership shares of individual generators reported in EIA 860 sum to 100%?
 * Are derived IDs that are used to group units of infrastructure together
   internally self consistent? For example, are there ever cases where a
@@ -181,24 +204,34 @@ against the data in this release prior to publication. These include:
   values, do annual slices of the data at least statistically consistent with
   the historical values reported for that quantity? For example, fuel prices
   per unit delivered and per unit heat content.
-* ......
-* ......
-* ......
-* ......
-* ......
-
-For the complete details see the `pudl.validate` module and the PyTest routines
-organized under `test/validate` in [the PUDL repository on
-Github](https://github.com/catalyst-cooperative/pudl). A summary
+* Do the fractions of different types of fuel consumed by FERC plants add up
+  to 100%?
+* Is there a strong correlation between total fuel cost and total heat content
+  of reported fuel consumed for large steam plants in FERC 1?
+* Are capacity factors generally between 0 and 1?
+* Are plant construction years all after 1850?
+* Is the fuel consumed for electricity generation always less than the total
+  fuel consumed?
+* Do any inferred generation units contain generators with differing primary
+  fuels?
+* Are plants reporting more than 8784 hours connected per year?
+* Are coal and gas generator capacity factors within expected ranges?
+* Are coal and gas generation unit heat rates within expected ranges?
 
 ## Known Issues
+This is probably not an exhaustive list. If you find something wonky, please
+bring it up in the [Github issue
+tracker](https://github.com/catalyst-cooperative/pudl/issues) so we can keep
+track of it, fix it, or add it to the documentation at least.
 
 ### No EIA 860 Data For 2009-2010
 Because of differences in formatting, The 2009-2010 EIA 860 data has not yet
 been fully integrated into PUDL. However, the EIA 923 data relies heavily on
 EIA 860 for detailed information about the utilities, plants, and generators it
 references, as well as the boiler-generator mappings. As a result, the entities
-which only appear in 2009-2010 may not have as much available detail.
+which only appear in 2009-2010 may not have as much available detail. See
+[Github issue 115](https://github.com/catalyst-cooperative/pudl/issues/115) for
+more details.
 
 ### Consistency of Harvested Entity Attributes
 EIA 860 reports the same information about utilities, plants, and generators
@@ -224,7 +257,8 @@ by the steam turbine.
 ### Unrealistically High Coal Mercury Content
 In 2012 a significant portion of the coal deliveries reported in the EIA 923
 Fuel Receipts and Costs table had mercury content orders of magnitude higher
-than was possible, and higher than in any other report year.
+than was possible, and higher than in any other report year. See [Github issue
+390](https://github.com/catalyst-cooperative/pudl/issues/390) for details.
 
 ### Imperfect FERC Form 1 Plant ID Assignments
 Because FERC does not assign unique identifiers to the individual plants whose
@@ -236,7 +270,9 @@ that considers the reported plant names, capacities, years of construction,
 primary fuels, and other attributes to attempt to associate plant records with
 each other across years, but the process is imperfect. The `plant_id_ferc1`
 values found in the `plants_steam_ferc1` and `fuel_ferc1` tables should be
-considered experimental and used with caution.
+considered experimental and used with caution. See [Github issue
+144](https://github.com/catalyst-cooperative/pudl/issues/144) for more on this
+endless saga.
 
 ### Non-unique Mappings Between `plants_steam_ferc1` & `fuel_ferc1`
 While the plant names and utility IDs found in the `plants_steam_ferc1` and
@@ -267,8 +303,8 @@ processing pipeline that we've used to generate this data release, and get the
 same outputs byte-for-byte, using only resources that are available in curated,
 long-term archives. The main requirements are a copy of the same original
 source data (archived as part of this data release), and a specification of the
-software environment (which can be reconstructed with packages from
-`conda-forge` or the Python Package Index).
+software environment, which can be reconstructed with packages from
+`conda-forge`.
 
 ## Original Source Data
 The original source data as downloaded from the public sources and used by the
@@ -279,6 +315,8 @@ that the same data may not remain available from them going forward. All of the
 original input data can be found in the `pudl-input-data.tgz` compressed
 archive distributed with this data release. The data it contains were
 downloaded from FERC, EIA, and EPA between January 31st and February 3rd, 2020.
+A small amount of additional data that we have compiled by hand is distributed
+as part of the Python package.
 
 ## Software Environment
 This data release was generated using v0.3.1 of the `catalystcoop.pudl` Python
@@ -292,15 +330,23 @@ The `archived-environment.yml` file distributed in this archive describes the
 `conda` software environment in which this data release was generated.
 
 ## OS / Hardware
-The data package was generated on an Ubuntu Linux 19.10 system. The only
-specialized external library that was required outside of the `conda` framework
-was `libsnappy-dev` version `1.1.7-1`. This library should not be required if
-you use `conda`.
+The data release was generated on a 64 bit, Intel based Ubuntu Linux 19.10
+system. The only specialized external library that was required outside of the
+`conda` framework was `libsnappy-dev` version `1.1.7-1`. Note that this library
+should not be required if you use `conda`.
 
 The data processing pipeline used to generate this data release required ~24 GB
 of memory, mostly due to record linkage between years of the large steam plants
-in the FERC Form 1 data. If you run the release reproduction script described
-below, it will require ~50 GB of free disk space.
+in the FERC Form 1 data. If you don't have that much physical memory, make sure
+you've got plenty of swap spac allocated! If you run the release reproduction
+script described below, it will require ~50 GB of free disk space. Most of this
+is the raw FERC Form 1 input data and the EPA CEMS.
+
+Note that because some of the `conda` packages that the data release relies on
+are platform specific, the release reproduction script provided as part of this
+archive will only work on a 64 bit Intel-based Linux system. For future data
+releases we will also archive a [Docker](https://docker.io) image providing OS
+virtualization to make reproduction easier and less platform dependent.
 
 ## Data Release Scripts
 The `data-release.sh` script used to generate this data release is included in
@@ -311,25 +357,39 @@ file included with the release.
 In order to reproduce the outputs archived here using the archived inputs, you
 should be able to simply place all of the files form the Zenodo archive in an
 empty directory, and run the `reproduce-data-release.sh` script from within
-that directory, subject to the hardware requirements mentioned above.
+that directory, subject to the OS and hardware requirements mentioned above.
 
 # Acknowledgments
-* Alfred P. Sloan
-* Flora Family Fund
-* Frictionless Data / Open Knowledge Foundation
+Catalyst would like to thank the [Alfred P. Sloan Foundation's Energy and
+Environment
+Program](https://sloan.org/programs/research/energy-and-environment) for
+funding a full year's worth of our work on the PUDL project.
+
+The [Flora Family Foundation](https://www.florafamily.org/) also provided us
+with a grant specifically for creating the data packaging infrastructure.
+
+Lily Winfree and Evgeny Karev from the [Open Knowledge
+Foundation](https://okfn.org/) worked with us in a pilot project under their
+[Frictionless Data for Reproducible
+Research](https://frictionlessdata.io/reproducible-research/) program, which
+was invaluable in getting our large interconnected data into an archival
+format.
+
+The European [Open Energy Modeling Initiative](https://openmod-initiative.org/)
+and [Open Power System Data](https://open-power-system-data.org/) project
+offered us valuable advise on best practices and served as models for PUDL.
+Thanks especially to Stefan Pfenninger at ETH Zürich and Ingmar Schlect at
+NEON Energie for welcoming us into that community of researchers.
+
+Many thanks also go to Uday Varadarajan, Ron Lehr, Harriet Moyer-Aptekar, Eric
+Gimon, Josh Rhodes and others at
+the [Climate Policy Initiative](https://climatepolicyinitiative.org/),
+the [Rocky Mountain Institute](https://rmi.org),
+[Vibrant Clean Energy](https://www.vibrantcleanenergy.com/),
+and [Energy Innovation](https://energyinnovation.org/)
+for their early and ongoing support and feedback.
 
 # TODO:
-
-## Writing:
-* Finish data errata / validation.
-* Acknowledgments
-* Contact Us / Bug Reports
-
-## Deployment / Publication
-* Create a pudl@catalyst.coop Zenodo organizational account
-* Get a real DOI for the data release from Zenodo using PUDL account
-* Insert real DOI into the README & ETL settings file.
-* Commit final README & ETL settings file with real DOI (ALL CEMS STATES).
 * Tag v1.0.0 in the pudl-data-release repository
 * Re-generate final v1.0.0 release using tagged commit.
 * Upload files to Zenodo for real

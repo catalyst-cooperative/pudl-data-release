@@ -12,23 +12,10 @@ PUDL_VERSION=0.3.1
 START_TIME=$(date --iso-8601="seconds")
 EIA860_YEARS="--years 2011 2012 2013 2014 2015 2016 2017 2018"
 EIA923_YEARS="--years 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018"
-# Default -- with no args -- is to load all available data:
+# Default (with no args) is to load all available data:
 EPACEMS_YEARS=""
-#EPACEMS_YEARS="--years 1995 1996 1997 1998 1999 2000 2001 2002 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018"
-#EPACEMS_STATES="--states ID"
 EPACEMS_STATES=""
-#FERC1_YEARS1="--years 1994 1995 1996 1997 1998 1999 2000 2001 2002 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018"
 FERC1_YEARS1=""
-###############################################################################
-# libsnappy needs to be installed for data validation since tox uses pip
-###############################################################################
-# sudo apt install libsnappy-dev libsnappy1v5
-
-###############################################################################
-# Create, activate, and record the pudl-data-release conda environment
-###############################################################################
-#wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
-#bash ~/miniconda.sh -b -p ~/miniconda3
 
 ###############################################################################
 # Create, activate, and record the pudl-data-release conda environment

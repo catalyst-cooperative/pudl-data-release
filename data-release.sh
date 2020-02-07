@@ -90,6 +90,7 @@ cp data-release.sh \
     data-release-settings.yml \
     archived-environment.yml \
     README.md \
+    load-pudl.sh \
     zenodo-archive
 
 echo "======================================================================"

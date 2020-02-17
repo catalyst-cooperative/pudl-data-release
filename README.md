@@ -1,15 +1,15 @@
-# PUDL Data Release 1.0.0
+# PUDL Data Release 1.1.0
 
-This is the first data release from the [Public Utility Data Liberation (PUDL)
+This is the second data release from the [Public Utility Data Liberation (PUDL)
 project](https://catalyst.coop/pudl). It can be referenced & cited using
-https://doi.org/10.5281/zenodo.3653159
+https://doi.org/10.5281/zenodo.3672068
 
 For more information about the free and open source software used to generate
 this data release, see [Catalyst Cooperative's PUDL repository on
 Github](https://github.com/catalyst-cooperative/pudl), and the associated
 [documentation on Read The
-Docs](https://catalystcoop-pudl.readthedocs.io/en/v0.3.1/). This data release
-was generated using v0.3.1 of the `catalystcoop.pudl` python package.
+Docs](https://catalystcoop-pudl.readthedocs.io/en/v0.3.2/). This data release
+was generated using v0.3.2 of the `catalystcoop.pudl` python package.
 
 # Included Data Packages
 This release consists of three tabular data packages, conforming to the
@@ -21,13 +21,12 @@ database.
 
 ## `pudl-eia860-eia923`
 Data originally collected and published by the [US Energy Information
-Administration](https://www.eia.gov/) (US EIA). The data from [EIA Form
-860](https://www.eia.gov/electricity/data/eia860/)
-covers the years 2011-2018. The [Form 923
-data](https://www.eia.gov/electricity/data/eia923/) covers 2009-2018. A large
-majority of the data published in the original data sources has been included,
-but some parts, like fuel stocks on hand, and EIA 923 schedules 6, 7, & 8 have
-not yet been integrated.
+Administration](https://www.eia.gov/) (US EIA) in their [Form
+860](https://www.eia.gov/electricity/data/eia860/) and [Form
+923](https://www.eia.gov/electricity/data/eia923/), covering the years
+2009-2018. A large majority of the data published in the original data sources
+has been included, but some parts, like fuel stocks on hand, and EIA 923
+schedules 6, 7, & 8 have not yet been integrated.
 
 ## `pudl-eia860-eia923-epacems`
 This data package contains all of the same data as the `pudl-eia860-eia923`
@@ -119,7 +118,7 @@ This installs the PUDL software locally, and a couple of other useful packages:
 ```
 conda create --yes --name pudl --channel conda-forge \
     --strict-channel-priority \
-    python=3.7 catalystcoop.pudl=0.3.1 dask jupyter jupyterlab seaborn pip
+    python=3.7 catalystcoop.pudl=0.3.2 dask jupyter jupyterlab seaborn pip
 conda activate pudl
 ```
 ### Create a PUDL data management workspace
@@ -232,15 +231,6 @@ bring it up in the [Github issue
 tracker](https://github.com/catalyst-cooperative/pudl/issues) so we can keep
 track of it, fix it, or add it to the documentation at least.
 
-### No EIA 860 Data For 2009-2010
-Because of differences in formatting, The 2009-2010 EIA 860 data has not yet
-been fully integrated into PUDL. However, the EIA 923 data relies heavily on
-EIA 860 for detailed information about the utilities, plants, and generators it
-references, as well as the boiler-generator mappings. As a result, the entities
-which only appear in 2009-2010 may not have as much available detail. See
-[Github issue 115](https://github.com/catalyst-cooperative/pudl/issues/115) for
-more details.
-
 ### Consistency of Harvested Entity Attributes
 EIA 860 reports the same information about utilities, plants, and generators
 over the years. Many of the reported attributes (like a plant's latitude and
@@ -329,12 +319,12 @@ A small amount of additional data that we have compiled by hand is distributed
 as part of the Python package.
 
 ## Software Environment
-This data release was generated using v0.3.1 of the `catalystcoop.pudl` Python
+This data release was generated using v0.3.2 of the `catalystcoop.pudl` Python
 package, which is available on the official Python Package Index as well as via
 `conda` using the community maintained `conda-forge` channel. It's also
 archived in [the PUDL Github
-repository](https://github.com/catalyst-cooperative/pudl/releases/tag/v0.3.1).
-and [on Zenodo](https://doi.org/10.5281/zenodo.3647661)
+repository](https://github.com/catalyst-cooperative/pudl/releases/tag/v0.3.2).
+and [on Zenodo](https://doi.org/10.5281/zenodo.3671600)
 
 The `archived-environment.yml` file distributed in this archive describes the
 `conda` software environment in which this data release was generated.
@@ -398,3 +388,25 @@ the [Rocky Mountain Institute](https://rmi.org),
 [Vibrant Clean Energy](https://www.vibrantcleanenergy.com/),
 and [Energy Innovation](https://energyinnovation.org/)
 for their early and ongoing support and feedback.
+
+# Changelog
+
+## v1.1.0
+Minor update release:
+* Based on `v0.3.2` of the `catalystcoop.pudl` Python package
+* Added EIA 860 data for 2009-2010
+* The redundant `rto_iso` column was removed from the plants_eia860 table, and
+  so the data package versions have been bumped to `2.0.0` for
+  `pudl-eia860-eia923` and `pudl-eia860-eia923-epacems`
+* FERC Form 1 data should remain unchanged, except insofar as additional
+  plants and utilities appearing only in the EIA 860 data for 2009-2010 should
+  now be mapped between the FERC Form 1 and EIA datasets. Thus the data package
+  version has been bumped to `1.1.0`.
+
+## v1.0.0
+First PUDL data release:
+* based on `v0.3.1` of the `catalystcoop.pudl` Python package
+* EIA 860 2011-2018
+* EIA 923 2009-2018
+* EPA CEMS 1995-2018
+* FERC Form 1 1994-2018

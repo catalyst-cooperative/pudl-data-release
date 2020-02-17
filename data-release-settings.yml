@@ -135,7 +135,7 @@ ferc1_to_sqlite_tables: [
 # Top level data package bundle settings:
 ###########################################################################
 datapkg_bundle_name: pudl-data-release
-datapkg_bundle_doi: 10.5281/zenodo.3653159
+datapkg_bundle_doi: 10.5281/zenodo.3672068
 datapkg_bundle_settings:
 ###########################################################################
 # FERC FORM 1 ETL SETTINGS
@@ -143,7 +143,7 @@ datapkg_bundle_settings:
   - name: pudl-ferc1
     title: FERC Form 1
     description: A subset of the data available from FERC Form 1, that has been cleaned and organized for release as part of Catalyst Cooperative's Public Utility Data Liberation (PUDL) project.
-    version: 1.0.0
+    version: 1.1.0
     datasets:
       - ferc1:
           ferc1_tables:
@@ -164,7 +164,7 @@ datapkg_bundle_settings:
   - name: pudl-eia860-eia923
     title: Data published by EIA in forms 860 and 923, cleaned and organized for release as part of Catalyst Cooperative's Public Utility Data Liberation (PUDL) project.
     description: Data pertaining primarily to US thermal plants, fuel consumption, electricity output, fuel costs, and plant and generator attributes.
-    version: 1.0.0
+    version: 2.0.0
     datasets:
       - eia:
           eia923_tables:
@@ -182,7 +182,8 @@ datapkg_bundle_settings:
             - plants_eia860
             - generators_eia860
             - ownership_eia860
-          eia860_years: [2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018]
+          eia860_years: [2009, 2010, 2011, 2012, 2013,
+                         2014, 2015, 2016, 2017, 2018]
 
 ###########################################################################
 # EPA CEMS HOURLY ETL SETTINGS
@@ -190,7 +191,7 @@ datapkg_bundle_settings:
   - name: pudl-eia860-eia923-epacems
     title: EPA CEMS Hourly
     description: Hourly emissions, power output, heat rates, and other data for most US fossil fuel plants, compiled by the US EPA as part of their Air Market Program Data, integrated with EIA 860 and 923 for release as part of Catalyst Cooperative's Public Utility Data Liberation (PUDL) project.
-    version: 1.0.0
+    version: 2.0.0
     datasets:
       - eia:
           eia923_tables:
@@ -208,9 +209,10 @@ datapkg_bundle_settings:
             - plants_eia860
             - generators_eia860
             - ownership_eia860
-          eia860_years: [2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018]
+          eia860_years: [2009, 2010, 2011, 2012, 2013,
+                         2014, 2015, 2016, 2017, 2018]
       - epacems:
           epacems_years: [1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
                           2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010,
                           2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018]
-          epacems_states: [ALL]
+          epacems_states: [CO, ID]

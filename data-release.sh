@@ -8,13 +8,12 @@
 #  - Should be run from within a fresh git clone:
 #    https://github.com/catalyst-cooperative/pudl-data-release.git
 
-PUDL_VERSION=0.3.1
+PUDL_VERSION=0.3.2
 START_TIME=$(date --iso-8601="seconds")
-EIA860_YEARS="--years 2011 2012 2013 2014 2015 2016 2017 2018"
-EIA923_YEARS="--years 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018"
+EIA_YEARS="--years 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018"
 # Default (with no args) is to load all available data:
 EPACEMS_YEARS=""
-EPACEMS_STATES=""
+EPACEMS_STATES="CO ID"
 FERC1_YEARS1=""
 
 ###############################################################################
@@ -36,7 +35,7 @@ ACTIVE_CONDA_ENV=$($CONDA_EXE env list | grep '\*' | awk '{print $1}')
 echo "Active conda env: $ACTIVE_CONDA_ENV"
 
 # Record exactly which software was installed for ETL:
-$CONDA_EXE env export --no-build | grep -v "^prefix" > archived-environment.yml
+$CONDA_EXE env export | grep -v "^prefix" > archived-environment.yml
 
 echo "======================================================================"
 date --iso-8601="seconds"
@@ -49,8 +48,8 @@ date --iso-8601="seconds"
 echo "Downloading raw input data."
 echo "======================================================================"
 pudl_data --sources epacems $EPACEMS_STATES $EPACEMS_YEARS
-pudl_data --sources eia860 $EIA860_YEARS
-pudl_data --sources eia923 $EIA923_YEARS
+pudl_data --sources eia860 $EIA_YEARS
+pudl_data --sources eia923 $EIA_YEARS
 pudl_data --sources ferc1 $FERC1_YEARS
 
 echo "======================================================================"

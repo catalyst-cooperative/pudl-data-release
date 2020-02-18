@@ -195,7 +195,8 @@ see the `pudl.validate` module and the PyTest routines organized under
 Generally these tests include:
 * Ensuring that there are no entirely NULL columns. This often happens due to
   a bad merge between dataframes when there's a misnamed column.
-* Make sure that tables have the expected number of records, to +/- 10%.
+* Make sure that tables have the expected number of records, to within a few
+  percent.
 * Ensure that tables do not contain duplicate records within specified subsets
   of columns that should serve as unique keys.
 * For reported values that have a physically constrained valid range of values

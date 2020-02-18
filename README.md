@@ -314,9 +314,9 @@ version control or provide access to historically published versions, meaning
 that the same data may not remain available from them going forward. All of the
 original input data can be found in the `pudl-input-data.tgz` compressed
 archive distributed with this data release. The data it contains were
-downloaded from FERC, EIA, and EPA between January 31st and February 3rd, 2020.
-A small amount of additional data that we have compiled by hand is distributed
-as part of the Python package.
+downloaded from FERC, EIA, and EPA between January 31st and February 17th,
+2020.  A small amount of additional data that we have compiled by hand is
+distributed as part of the Python package.
 
 ## Software Environment
 This data release was generated using v0.3.2 of the `catalystcoop.pudl` Python

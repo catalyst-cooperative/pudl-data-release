@@ -2,7 +2,7 @@
 
 START_TIME=$(date --iso-8601="seconds")
 PUDL_VERSION=0.3.2
-EPACEMS_STATES="--states CO ID"
+EPACEMS_STATES=""
 
 # This is some setup required to make conda work in a shell script.  If you
 # wanted to run the commands below in the terminal it wouldn't be needed
